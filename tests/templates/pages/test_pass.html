@@ -1,0 +1,36 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Test pass - {{ object.name }}{% endblock %}
+{% block header %}Test pass - {{ object.name }}{% endblock %}
+
+{% block content %}
+  <form method="post">
+    {% csrf_token %}
+    {% for question in questions %}
+      <div class="card mt-3">
+        <div class="card-header">
+          {{ question.text }}
+        </div>
+        <div class="card-body row gy-3">
+          {% for answer in question.answers.all %}
+            <div class="col-12 col-md-6">
+              <div class="input-group flex-nowrap">
+                <label for="answer_{{ answer.id }}" class="input-group-text">{{ answer.letter }}.</label>
+                <label for="answer_{{ answer.id }}" class="input-group-text flex-grow-1 text-wrap text-start">
+                  {{ answer.text }}
+                </label>
+                <div class="input-group-text">
+                  <input class="form-check-input mt-0" type="radio" name="question_{{ question.id }}" id="answer_{{ answer.id }}" value="{{ answer.id }}">
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    <div class="buttons mt-3">
+      <a href="{% url 'test_detail' object.pk %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+{% endblock %}

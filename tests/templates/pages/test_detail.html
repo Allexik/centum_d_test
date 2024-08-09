@@ -5,11 +5,14 @@
 
 {% block content %}
   <div class="card">
-    <div class="card-header text-bg-secondary">
-      Description
+    <div class="card-header">
+      {{ object.name }} ({{ object.user.username }})
     </div>
     <div class="card-body">
       {{ object.description }}
+    </div>
+    <div class="card-footer">
+      <span>Passed times: {{ object.passes_number }}</span>
     </div>
   </div>
   <div class="row gy-3 mt-0">
@@ -35,8 +38,10 @@
       </div>
     {% endfor %}
   </div>
-  <div class="buttons mt-3">
-    <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-primary">Edit</a>
+  <div class="buttons d-flex mt-3" style="gap: 4px">
+    <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-outline-secondary">Edit</a>
     <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-outline-danger">Delete</a>
+    <div class="mx-auto"></div>
+    <a href="{% url 'test_pass' object.pk %}" type="button" class="btn btn-primary">Pass the test</a>
   </div>
 {% endblock %}

@@ -53,15 +53,16 @@ class Answer(models.Model):
         return self.text
 
 
-class UserTest(models.Model):
+class Result(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     score = models.PositiveSmallIntegerField()
+    question_count = models.PositiveSmallIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.user} - {self.test}'
+        return f'{self.user} - {self.test} - {self.score}'
 
 
 class Comment(models.Model):

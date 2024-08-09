@@ -1,9 +1,12 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from tests.models import Test
+from tests.models import Test, Result
 from tests.forms import TestForm, QuestionFormSet, AnswerFormSet
+from tests.utils.views import OwnerRequiredMixin
 
 
 class TestListView(ListView):
@@ -16,7 +19,7 @@ class TestDetailView(DetailView):
     template_name = 'pages/test_detail.html'
 
 
-class TestCreateView(CreateView):
+class TestCreateView(LoginRequiredMixin, CreateView):
     model = Test
     form_class = TestForm
     template_name = 'pages/test_form.html'
@@ -81,10 +84,20 @@ class TestCreateView(CreateView):
             })
 
 
-class TestUpdateView(UpdateView):
+class TestUpdateView(OwnerRequiredMixin, LoginRequiredMixin, UpdateView):
     model = Test
     form_class = TestForm
     template_name = 'pages/test_form.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(owner=self.request.user)
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.owner != request.user:
+            raise PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy('test_detail', kwargs={'pk': self.object.pk})
@@ -93,11 +106,11 @@ class TestUpdateView(UpdateView):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
             data['question_formset'] = QuestionFormSet(self.request.POST, instance=self.object)
-            initial_questions_count = int(data['question_formset'].management_form.cleaned_data['INITIAL_FORMS'])
+            initial_question_count = int(data['question_formset'].management_form.cleaned_data['INITIAL_FORMS'])
             data['answer_formsets'] = [
                 AnswerFormSet(
                     self.request.POST,
-                    instance=question_form.instance if index < initial_questions_count else None,
+                    instance=question_form.instance if index < initial_question_count else None,
                     prefix=f'questions-{question_form.prefix.split('-')[1]}-answers'
                 )
                 for index, question_form in enumerate(data['question_formset'])
@@ -153,7 +166,62 @@ class TestUpdateView(UpdateView):
             })
 
 
-class TestDeleteView(DeleteView):
+class TestDeleteView(OwnerRequiredMixin, LoginRequiredMixin, DeleteView):
     model = Test
     template_name = 'pages/test_confirm_delete.html'
     success_url = reverse_lazy('test_list')
+
+
+class TestPassView(LoginRequiredMixin, DetailView):
+    model = Test
+    template_name = 'pages/test_pass.html'
+
+    def get_success_url(self, result_pk):
+        return reverse_lazy('test_result', kwargs={'pk': result_pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['questions'] = self.object.questions.all()
+        return context
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        questions = self.object.questions.prefetch_related('answers')
+        score = 0
+
+        for question in questions:
+            selected_answer_id = request.POST.get(f'question_{question.id}')
+            if selected_answer_id:
+                selected_answer = question.answers.get(id=selected_answer_id)
+                if selected_answer.is_correct:
+                    score += 1
+
+        result_instance = Result.objects.create(
+            user=request.user,
+            test=self.object,
+            score=score,
+            question_count=questions.count(),
+        )
+
+        self.object.passes_number += 1
+        self.object.save()
+
+        return redirect(self.get_success_url(result_instance.pk))
+
+
+class TestResultsView(LoginRequiredMixin, ListView):
+    model = Result
+    template_name = 'pages/test_results.html'
+    paginate_by = 10
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user)
+
+
+class TestResultView(OwnerRequiredMixin, LoginRequiredMixin, DetailView):
+    model = Result
+    template_name = 'pages/test_result.html'
+

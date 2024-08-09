@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from tests.models import Test, Question, Answer, UserTest, Comment
+from tests.models import Test, Question, Answer, Result, Comment
 
 
 class QuestionInline(admin.TabularInline):
@@ -36,9 +36,9 @@ class AnswerAdmin(admin.ModelAdmin):
     list_filter = ['question__test', 'question']
 
 
-@admin.register(UserTest)
-class UserTestAdmin(admin.ModelAdmin):
-    list_display = ['user', 'test', 'score', 'created_at', 'updated_at']
+@admin.register(Result)
+class ResultAdmin(admin.ModelAdmin):
+    list_display = ['user', 'test', 'score', 'question_count', 'created_at', 'updated_at']
 
 
 @admin.register(Comment)

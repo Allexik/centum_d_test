@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+{% load mathfilters %}
+
+{% block title %}Result Detail - {{ object.test.name }}{% endblock %}
+{% block header %}Result Detail - {{ object.test.name }}{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-header">
+      {{ object.test.name }} ({{ object.test.user.username }})
+    </div>
+    <div class="card-body">
+      <p class="mb-1">
+        Score: {{ object.score }} / {{ object.question_count }}&nbsp;
+        ({{ object.score|div:object.question_count|mul:100|floatformat:0 }}%)
+      </p>
+      <small class="mb-0">Date: {{ object.created_at }}</small>
+    </div>
+  </div>
+  <a href="{% url 'test_results' %}" class="btn btn-primary mt-3">Back to results</a>
+{% endblock %}
