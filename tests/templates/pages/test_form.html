@@ -1,0 +1,214 @@
+{% extends "base_generic.html" %}
+{% load rest_framework %}
+{% load static %}
+{% load custom_tags %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/pages/test-form.css' %}">
+{% endblock %}
+
+{% block title %}{% if object.pk %}Edit{% else %}Create{% endif %} Test{% endblock %}
+{% block header %}{% if object.pk %}Edit{% else %}Create{% endif %} Test{% endblock %}
+
+{% block content %}
+  <form
+    method="post"
+    class="needs-validation"
+    novalidate
+  >
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="{% if form.is_bound %}was-validated{% endif %}">
+        <div class="mb-2">
+          {{ field.label_tag|add_class:"form-label" }}
+          {{ field|add_class:"form-control" }}
+          {% for error in field.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    {{ question_formset.management_form }}
+    <div id="questions" class="question-forms mt-4">
+      {% for question_form in question_formset.forms %}
+        <div class="question-form card mt-3 {% if form.is_bound %}was-validated{% endif %}">
+          {{ question_form.id }}
+          {{ question_form.test }}
+          <div class="card-header">
+            <div class="input-group">
+              <label for="{{ question_form.text.id_for_label }}" class="input-group-text">Question: </label>
+              {{ question_form.text|add_class:"form-control" }}
+              <span class="input-group-text">Delete</span>
+              <div class="input-group-text">
+                {{ question_form.DELETE|add_class:"form-check-input mt-0" }}
+              </div>
+              {% for error in question_form.text.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% with answer_formset=answer_formsets|index:forloop.counter0 %}
+            {{ answer_formset.management_form }}
+            <div class="card-body">
+              <div class="answer-forms row gy-3">
+                {% for answer_form in answer_formset %}
+                  <div class="col-12 col-lg-6">
+                    <div class="answer-form">
+                      {{ answer_form.id }}
+                      {{ answer_form.question }}
+                      <div class="input-group">
+                        {{ answer_form.letter }}
+                        <label for="{{ answer_form.text.id_for_label }}-radio" class="input-group-text">
+                          {{ answer_form.letter.value }}:
+                        </label>
+                        {{ answer_form.text|add_class:"form-control" }}
+                        <span class="input-group-text">Correct</span>
+                        <div class="input-group-text">
+                          {{ answer_form.is_correct|add_class:"form-check-input mt-0" }}
+                          <input
+                            type="radio"
+                            class="form-check-input mt-0"
+                            id="{{ answer_form.text.id_for_label }}-radio"
+                            name="{{ question_form.prefix }}-correct"
+                            {% if answer_form.is_correct.value|stringformat:'s'|lower == 'true' %}checked{% endif %}
+                            required
+                          >
+                        </div>
+                        {% for error in answer_form.text.errors %}
+                          <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if answer_formset.non_form_errors|length > 0 %}
+                <hr class="mb-2"/>
+              {% endif %}
+              {% for error in answer_formset.non_form_errors.as_data %}
+                {% if error.code != 'too_few_forms' %}
+                  <div class="invalid-feedback d-block">{{ error.message }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endwith %}
+        </div>
+      {% endfor %}
+    </div>
+    {% for error in question_formset.non_form_errors %}
+      <div class="invalid-feedback d-block">{{ error }}</div>
+    {% endfor %}
+    <div class="buttons d-flex mt-3" style="gap: 4px">
+      <button type="button" id="add-question" class="btn btn-secondary">Add question</button>
+      <div class="mx-auto"></div>
+      {% if object.pk %}
+        <a href="{% url 'test_detail' object.pk %}" type="button" class="btn btn-outline-danger">Cancel</a>
+      {% else %}
+        <a href="{% url 'test_list' %}" type="button" class="btn btn-outline-danger">Cancel</a>
+      {% endif %}
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </form>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const questionsDiv = document.getElementById('questions');
+      const addQuestionButton = document.getElementById('add-question');
+      const questionTemplate = document.getElementById('question-template');
+      const questionTotalForms = document.getElementById('id_questions-TOTAL_FORMS');
+
+      let questionIndex = {{ question_formset.total_form_count }};
+
+      addQuestionButton.addEventListener('click', function() {
+        const newQuestionForm = questionTemplate.content.cloneNode(true);
+
+        newQuestionForm.querySelectorAll('[name]:not(.answer-form [name])').forEach(input => {
+          const label = newQuestionForm.querySelector(`label[for="${input.getAttribute('id')}"]`);
+          const name = input.getAttribute('name')
+              .replace('__question_prefix__', questionIndex)
+              .replace('__prefix__', questionIndex);
+          const id = input.getAttribute('id')
+              .replace('__question_prefix__', questionIndex)
+              .replace('__prefix__', questionIndex);
+          input.setAttribute('name', name);
+          input.setAttribute('id', id);
+          label?.setAttribute('for', id);
+        });
+
+        newQuestionForm.querySelectorAll('.answer-form').forEach((answerForm, i) => {
+          answerForm.querySelectorAll('[name]').forEach(input => {
+            const label = answerForm.querySelector(`label[for="${input.getAttribute('id')}"]`);
+            const name = input.getAttribute('name')
+                .replace('__question_prefix__', questionIndex)
+                .replace('__prefix__', i);
+            const id = input.getAttribute('id')
+                .replace('__question_prefix__', questionIndex)
+                .replace('__prefix__', i);
+            input.setAttribute('name', name);
+            input.setAttribute('id', id);
+            label?.setAttribute('for', id);
+          });
+        });
+
+        questionIndex++;
+        questionTotalForms.setAttribute('value', questionIndex);
+        questionsDiv.appendChild(newQuestionForm);
+      });
+
+      questionsDiv.addEventListener('change', function(event) {
+        if (event.target.type === 'radio') {
+          const radioName = event.target.name;
+          const radios = document.querySelectorAll(`input[name="${radioName}"]`);
+          radios.forEach(radio => {
+            const hiddenInput = radio.parentElement.querySelector('input[type="hidden"]');
+            hiddenInput.value = !!radio.checked;
+          });
+        }
+      });
+    });
+  </script>
+  <template id="question-template">
+    <div class="question-form card mt-3">
+      {{ question_form.test }}
+      <div class="card-header">
+        <div class="input-group">
+          <label for="{{ empty_question_form.text.id_for_label }}" class="input-group-text">Question: </label>
+          {{ empty_question_form.text|add_class:"form-control" }}
+          <span class="input-group-text">Delete</span>
+          <div class="input-group-text">
+            {{ empty_question_form.DELETE|add_class:"form-check-input mt-0" }}
+          </div>
+        </div>
+      </div>
+      {{ template_answer_formset.management_form }}
+      <div class="card-body">
+        <div class="answer-forms row gy-3">
+          {% for template_answer_form in template_answer_formset %}
+            <div class="col-12 col-lg-6">
+              <div class="answer-form">
+                <div class="input-group">
+                  {{ template_answer_form.letter }}
+                  <label for="{{ template_answer_form.text.id_for_label }}-radio" class="input-group-text">
+                    {{ template_answer_form.letter.value }}:
+                  </label>
+                  {{ template_answer_form.text|add_class:"form-control" }}
+                  <span class="input-group-text">Correct</span>
+                  <div class="input-group-text">
+                    {{ template_answer_form.is_correct|add_class:"form-check-input mt-0" }}
+                    <input
+                      type="radio"
+                      class="form-check-input mt-0"
+                      id="{{ template_answer_form.text.id_for_label }}-radio"
+                      name="{{ template_question_prefix }}-correct"
+                      {% if template_answer_form.is_correct.value|stringformat:'s'|lower == 'true' %}checked{% endif %}
+                      required
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </template>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Test List{% endblock %}
+{% block header %}Test List{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="list-group">
+        {% for test in object_list %}
+          <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">{{ test.name }}</a>
+        {% endfor %}
+      </div>
+      <a href="{% url 'test_create' %}" type="button" class="btn btn-primary mt-3">Create new test</a>
+    </div>
+  </div>
+{% endblock %}

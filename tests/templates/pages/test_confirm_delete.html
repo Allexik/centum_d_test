@@ -1,0 +1,13 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Confirm Delete{% endblock %}
+{% block header %}Confirm Delete{% endblock %}
+
+{% block content %}
+  <p>Are you sure you want to delete "{{ object.name }}"?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'test_detail' object.pk %}" type="button" class="btn btn-outline-primary">Cancel</a>
+  </form>
+{% endblock %}
