@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 from accounts.models import Profile
+from tests.models import Result
 
 
 User = get_user_model()
@@ -15,8 +16,16 @@ class ProfileInline(admin.StackedInline):
     fk_name = 'user'
 
 
+class ResultInline(admin.StackedInline):
+    model = Result
+    can_delete = False
+    extra = 0
+    verbose_name_plural = 'Result'
+    fk_name = 'user'
+
+
 class CustomUserAdmin(UserAdmin):
-    inlines = (ProfileInline, )
+    inlines = (ProfileInline, ResultInline)
 
     def get_inline_instances(self, request, obj=None):
         if not obj:
