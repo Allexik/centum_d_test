@@ -19,8 +19,9 @@
   </div>
   <div class="buttons d-flex mt-3" style="gap: 0.25rem">
     {% if object.user == request.user %}
-      <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-outline-secondary">Edit</a>
-      <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-outline-danger">Delete</a>
+      <a href="{% url 'test_list' %}" type="button" class="btn btn-outline-secondary">Back to list</a>
+      <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-secondary">Edit</a>
+      <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-danger">Delete</a>
     {% endif %}
     <div class="mx-auto"></div>
     <a href="{% url 'test_pass' object.pk %}" type="button" class="btn btn-primary">Pass the test</a>

@@ -18,5 +18,12 @@
       <small class="mb-0">Date: {{ object.created_at }}</small>
     </div>
   </div>
-  <a href="{% url 'test_results' %}" class="btn btn-primary mt-3">Back to results</a>
+  <div class="buttons d-flex mt-3" style="gap: 0.25rem">
+    {% if object.user == request.user %}
+      <a href="{% url 'test_results' %}" class="btn btn-outline-secondary">See other results</a>
+      <a href="{% url 'test_detail' object.test.id %}" class="btn btn-secondary">Test detail</a>
+    {% endif %}
+    <div class="mx-auto"></div>
+    <a href="{% url 'test_pass' object.test.id %}" class="btn btn-success">Pass again</a>
+  </div>
 {% endblock %}
