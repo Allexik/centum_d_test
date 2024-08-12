@@ -6,8 +6,9 @@
 
 {% block content %}
   <div class="card">
-    <div class="card-header">
-      {{ object.test.name }} ({{ object.test.user.username }})
+    <div class="card-header d-flex justify-content-between">
+      <span class="fw-semibold">{{ object.test.name }}</span>
+      <span class="text-muted">Created by: <span class="fw-semibold">{{ object.test.user.username }}</span></span>
     </div>
     <div class="card-body">
       <p class="mb-1">

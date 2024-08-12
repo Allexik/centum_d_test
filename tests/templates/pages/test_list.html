@@ -5,10 +5,16 @@
 
 {% block content %}
   <div class="row">
-    <div class="col-12 col-md-6 col-xl-4">
+    <div class="col-12 col-md-8 col-xl-6">
       <div class="list-group">
         {% for test in object_list %}
-          <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">{{ test.name }}</a>
+          <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">
+            <h5 class="mb-1">{{ test.name }}</h5>
+            <div class="d-flex justify-content-between align-items-end" style="gap: 8px">
+              <span>{{ test.description }}</span>
+              <small>Passed times: {{ test.passes_number }}</small>
+            </div>
+          </a>
         {% endfor %}
       </div>
       <a href="{% url 'test_create' %}" type="button" class="btn btn-primary mt-3">Create new test</a>

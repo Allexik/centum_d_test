@@ -9,7 +9,7 @@
     {% for question in questions %}
       <div class="card mt-3">
         <div class="card-header">
-          {{ question.text }}
+          <span class="fw-semibold">Question:</span> {{ question.text }}
         </div>
         <div class="card-body row gy-3">
           {% for answer in question.answers.all %}

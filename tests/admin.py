@@ -43,5 +43,5 @@ class ResultAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['test', 'comment_text', 'created_at', 'updated_at']
+    list_display = ['test', 'text', 'created_at', 'updated_at']
 

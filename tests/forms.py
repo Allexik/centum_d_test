@@ -2,7 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 from django.utils.translation import ngettext_lazy
 
-from tests.models import Test, Question, Answer
+from tests.models import Test, Question, Answer, Comment
 
 
 class TestForm(forms.ModelForm):
@@ -85,3 +85,13 @@ AnswerFormSet = inlineformset_factory(Question, Answer, form=AnswerForm,
                                       formset=BaseAnswerFormSet,
                                       min_num=4, max_num=4, extra=0, can_delete=False,
                                       validate_min=True, validate_max=True)
+
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comment
+        fields = ['text']
+        widgets = {
+            'text': forms.Textarea(attrs={'rows': 3, 'required': True}),
+        }

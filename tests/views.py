@@ -1,11 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Prefetch
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from tests.models import Test, Result
-from tests.forms import TestForm, QuestionFormSet, AnswerFormSet
+from tests.models import Test, Result, Comment
+from tests.forms import TestForm, QuestionFormSet, AnswerFormSet, CommentForm
 from tests.utils.views import OwnerRequiredMixin
 
 
@@ -17,6 +17,17 @@ class TestListView(ListView):
 class TestDetailView(DetailView):
     model = Test
     template_name = 'pages/test_detail.html'
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(
+            Prefetch('comments', queryset=Comment.objects.order_by('-created_at')),
+            'comments__user',
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        return context
 
 
 class TestCreateView(LoginRequiredMixin, CreateView):
@@ -41,6 +52,7 @@ class TestCreateView(LoginRequiredMixin, CreateView):
                 AnswerFormSet(prefix=f'questions-{question_form.prefix.split('-')[1]}-answers')
                 for question_form in data['question_formset']
             ]
+        data['active_question_count'] = len(data['question_formset']) - len(data['question_formset'].deleted_forms)
         data['empty_question_form'] = QuestionFormSet().empty_form
         data['template_answer_formset'] = AnswerFormSet(
             prefix=f'questions-__question_prefix__-answers'
@@ -90,14 +102,7 @@ class TestUpdateView(OwnerRequiredMixin, LoginRequiredMixin, UpdateView):
     template_name = 'pages/test_form.html'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(owner=self.request.user)
-
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != request.user:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
+        return super().get_queryset().prefetch_related('questions__answers')
 
     def get_success_url(self):
         return reverse_lazy('test_detail', kwargs={'pk': self.object.pk})
@@ -124,6 +129,7 @@ class TestUpdateView(OwnerRequiredMixin, LoginRequiredMixin, UpdateView):
                 )
                 for question_form in data['question_formset']
             ]
+        data['active_question_count'] = len(data['question_formset']) - len(data['question_formset'].deleted_forms)
         data['empty_question_form'] = QuestionFormSet().empty_form
         data['template_answer_formset'] = AnswerFormSet(
             prefix=f'questions-__question_prefix__-answers'
@@ -172,6 +178,22 @@ class TestDeleteView(OwnerRequiredMixin, LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('test_list')
 
 
+class TestCommentView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+
+    def get(self, request, *args, **kwargs):
+        return redirect('test_detail', pk=kwargs['pk'])
+
+    def get_success_url(self):
+        return reverse_lazy('test_detail', kwargs={'pk': self.object.test.pk})
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.test_id = self.kwargs['pk']
+        return super().form_valid(form)
+
+
 class TestPassView(LoginRequiredMixin, DetailView):
     model = Test
     template_name = 'pages/test_pass.html'
@@ -181,7 +203,7 @@ class TestPassView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['questions'] = self.object.questions.all()
+        context['questions'] = self.object.questions.prefetch_related('answers')
         return context
 
     @transaction.atomic
@@ -217,8 +239,9 @@ class TestResultsView(LoginRequiredMixin, ListView):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(user=self.request.user)
+        return (super().get_queryset()
+                .filter(user=self.request.user)
+                .select_related('test'))
 
 
 class TestResultView(OwnerRequiredMixin, LoginRequiredMixin, DetailView):

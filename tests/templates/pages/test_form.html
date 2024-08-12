@@ -2,6 +2,7 @@
 {% load rest_framework %}
 {% load static %}
 {% load custom_tags %}
+{% load mathfilters %}
 
 {% block extra_head %}
   <link rel="stylesheet" href="{% static 'css/pages/test-form.css' %}">
@@ -38,7 +39,7 @@
             <div class="input-group">
               <label for="{{ question_form.text.id_for_label }}" class="input-group-text">Question: </label>
               {{ question_form.text|add_class:"form-control" }}
-              <span class="input-group-text">Delete</span>
+              <label for="{{ question_form.DELETE.id_for_label }}" class="input-group-text">Delete</label>
               <div class="input-group-text">
                 {{ question_form.DELETE|add_class:"form-check-input mt-0" }}
               </div>
@@ -58,17 +59,19 @@
                       {{ answer_form.question }}
                       <div class="input-group">
                         {{ answer_form.letter }}
-                        <label for="{{ answer_form.text.id_for_label }}-radio" class="input-group-text">
+                        <label for="{{ answer_form.text.id_for_label }}" class="input-group-text">
                           {{ answer_form.letter.value }}:
                         </label>
                         {{ answer_form.text|add_class:"form-control" }}
-                        <span class="input-group-text">Correct</span>
+                        <label for="{{ answer_form.is_correct.id_for_label }}-radio" class="input-group-text">
+                          Correct
+                        </label>
                         <div class="input-group-text">
                           {{ answer_form.is_correct|add_class:"form-check-input mt-0" }}
                           <input
                             type="radio"
                             class="form-check-input mt-0"
-                            id="{{ answer_form.text.id_for_label }}-radio"
+                            id="{{ answer_form.is_correct.id_for_label }}-radio"
                             name="{{ question_form.prefix }}-correct"
                             {% if answer_form.is_correct.value|stringformat:'s'|lower == 'true' %}checked{% endif %}
                             required
@@ -173,7 +176,7 @@
         <div class="input-group">
           <label for="{{ empty_question_form.text.id_for_label }}" class="input-group-text">Question: </label>
           {{ empty_question_form.text|add_class:"form-control" }}
-          <span class="input-group-text">Delete</span>
+          <label for="{{ empty_question_form.DELETE.id_for_label }}" class="input-group-text">Delete</label>
           <div class="input-group-text">
             {{ empty_question_form.DELETE|add_class:"form-check-input mt-0" }}
           </div>
@@ -187,17 +190,19 @@
               <div class="answer-form">
                 <div class="input-group">
                   {{ template_answer_form.letter }}
-                  <label for="{{ template_answer_form.text.id_for_label }}-radio" class="input-group-text">
+                  <label for="{{ template_answer_form.text.id_for_label }}" class="input-group-text">
                     {{ template_answer_form.letter.value }}:
                   </label>
                   {{ template_answer_form.text|add_class:"form-control" }}
-                  <span class="input-group-text">Correct</span>
+                  <label for="{{ template_answer_form.is_correct.id_for_label }}-radio" class="input-group-text">
+                    Correct
+                  </label>
                   <div class="input-group-text">
                     {{ template_answer_form.is_correct|add_class:"form-check-input mt-0" }}
                     <input
                       type="radio"
                       class="form-check-input mt-0"
-                      id="{{ template_answer_form.text.id_for_label }}-radio"
+                      id="{{ template_answer_form.is_correct.id_for_label }}-radio"
                       name="{{ template_question_prefix }}-correct"
                       {% if template_answer_form.is_correct.value|stringformat:'s'|lower == 'true' %}checked{% endif %}
                       required

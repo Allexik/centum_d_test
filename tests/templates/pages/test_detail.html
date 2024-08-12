@@ -1,12 +1,14 @@
 {% extends "base_generic.html" %}
+{% load rest_framework %}
 
 {% block title %}Test Detail - {{ object.name }}{% endblock %}
 {% block header %}Test Detail - {{ object.name }}{% endblock %}
 
 {% block content %}
   <div class="card">
-    <div class="card-header">
-      {{ object.name }} ({{ object.user.username }})
+    <div class="card-header d-flex justify-content-between">
+      <span class="fw-semibold">{{ object.name }}</span>
+      <span class="text-muted">Created by: <span class="fw-semibold">{{ object.user.username }}</span></span>
     </div>
     <div class="card-body">
       {{ object.description }}
@@ -15,33 +17,40 @@
       <span>Passed times: {{ object.passes_number }}</span>
     </div>
   </div>
-  <div class="row gy-3 mt-0">
-    {% for question in object.questions.all %}
-      <div class="col-12 col-md-6 col-xl-4">
-        <div class="card">
-          <div class="card-header">
-            Question: {{ question.text }}
-          </div>
-          <ul class="list-group list-group-flush">
-            {% for answer in question.answers.all %}
-              <li class="list-group-item d-flex">
-                {{ answer.letter }}.
-                {{ answer.text }}
-                <div class="mx-auto"></div>
-                {% if answer.is_correct %}
-                  <span class="badge bg-success">Correct</span>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
   <div class="buttons d-flex mt-3" style="gap: 4px">
-    <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-outline-secondary">Edit</a>
-    <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-outline-danger">Delete</a>
+    {% if object.user == request.user %}
+      <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-outline-secondary">Edit</a>
+      <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-outline-danger">Delete</a>
+    {% endif %}
     <div class="mx-auto"></div>
     <a href="{% url 'test_pass' object.pk %}" type="button" class="btn btn-primary">Pass the test</a>
   </div>
+  <hr class="mt-4">
+  <h2 class="mb-3">Comments</h2>
+  <form action="{% url 'test_comment' object.pk %}" method="post">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <label for="{{ comment_form.text.id_for_label }}">Leave a comment</label>
+      </div>
+      <div class="card-body">
+        {{ comment_form.text|add_class:"form-control" }}
+      </div>
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Add comment</button>
+      </div>
+    </div>
+    {% for comment in object.comments.all %}
+      <div class="card mt-3">
+        <div class="card-header d-flex">
+          {{ comment.user.username }}
+          <div class="mx-auto"></div>
+          <span class="text-muted">{{ comment.created_at }}</span>
+        </div>
+        <div class="card-body">
+          {{ comment.text }}
+        </div>
+      </div>
+    {% endfor %}
+  </form>
 {% endblock %}

@@ -32,7 +32,7 @@ class Answer(models.Model):
     So this model may be removed and changed by the corresponding fields
     in the Question model which would reduce the complexity.
     But for the sake of showing my skills, I will go with it :)
-    (and because I'm almost done with stuff for it on the moment of writing this ;) )
+    (and because I'm almost done with the stuff for it on the moment of writing this ;) )
     """
 
     LETTERS = [
@@ -66,10 +66,11 @@ class Result(models.Model):
 
 
 class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.CASCADE, related_name='comments')
-    comment_text = models.TextField()
+    text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.comment_text
+        return self.text
