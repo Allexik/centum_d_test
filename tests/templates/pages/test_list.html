@@ -9,9 +9,9 @@
 {% block header %}Test List{% endblock %}
 
 {% block content %}
-  <div class="d-flex" style="gap: 0.5rem">
+  <div class="d-flex flex-wrap" style="gap: 0.5rem">
     <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         Sort by
       </button>
 
@@ -53,7 +53,7 @@
       {% endwith %}
     </div>
     <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
         Filters
       </button>
 
@@ -86,6 +86,31 @@
         </div>
       </form>
     </div>
+    <form action="{% url 'test_list' %}" method="get" id="list-type-form">
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <input 
+          type="radio" 
+          class="btn-check" 
+          name="list_type" 
+          id="all-tests" 
+          autocomplete="off" 
+          value="all"
+          {% if request.GET.list_type == 'all' or not request.GET.list_type %}checked{% endif %}
+        >
+        <label class="btn btn-outline-secondary text-nowrap" for="all-tests">All tests</label>
+
+        <input 
+          type="radio"
+          class="btn-check"
+          name="list_type"
+          id="my-tests"
+          autocomplete="off"
+          value="my"
+          {% if request.GET.list_type == 'my' %}checked{% endif %}
+        >
+        <label class="btn btn-outline-secondary text-nowrap" for="my-tests">My tests</label>
+      </div>
+    </form>
     <div class="mx-auto"></div>
     <form action="{% url 'test_list' %}" method="get" id="search-form">
       <div class="input-group">
@@ -125,6 +150,13 @@
         const sortForm = document.getElementById('sort-form');
         const filterForm = document.getElementById('filter-form');
         const searchForm = document.getElementById('search-form');
+        const listTypeForm = document.getElementById('list-type-form');
+
+        listTypeForm.querySelectorAll('input').forEach((input) => {
+            input.addEventListener('change', function () {
+                listTypeForm.dispatchEvent(new Event('submit', { bubbles: true }));
+            });
+        });
 
         function handleFormSubmit(event) {
             event.preventDefault();
@@ -146,6 +178,7 @@
         sortForm.addEventListener('submit', handleFormSubmit);
         filterForm.addEventListener('submit', handleFormSubmit);
         searchForm.addEventListener('submit', handleFormSubmit);
+        listTypeForm.addEventListener('submit', handleFormSubmit);
     });
 
     document.addEventListener('DOMContentLoaded', function () {

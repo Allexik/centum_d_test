@@ -18,8 +18,11 @@ class TestListView(ListView):
         order_by = self.request.GET.get('order_by', '-created_at').split('__')[0]
         passes_number_min = self.request.GET.get('passes_number_min')
         passes_number_max = self.request.GET.get('passes_number_max')
+        list_type = self.request.GET.get('list_type', 'all')
 
         queryset = super().get_queryset().order_by(order_by)
+        if list_type == 'my':
+            queryset = queryset.filter(user=self.request.user)
         if search:
             queryset = queryset.filter(name__icontains=search)
         if passes_number_min:

@@ -1,0 +1,92 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load mathfilters %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+{% endblock %}
+
+{% block title %}Profile{% endblock %}
+{% block header %}Profile{% endblock %}
+
+{% block content %}
+  <div class="row gy-3">
+    <div class="col-md-4">
+      <div class="card">
+        {% if user.profile.profile_image %}
+          <img src="{{ user.profile.profile_image.url }}" class="profile-image card-img-top" alt="Profile Image">
+        {% else %}
+          <img src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930" class="profile-image card-img-top" alt="Profile Image">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ user.username }}</h5>
+          <p class="card-text mb-1">Email: {{ user.email }}</p>
+          {% if user.first_name or user.last_name %}
+            <p class="card-text mb-1">Name: {{ user.first_name }} {{ user.last_name }}</p>
+          {% endif %}
+          {% if user.profile.birth_date %}
+            <p class="card-text mb-1">Birthdate: {{ user.profile.birth_date }}</p>
+          {% endif %}
+          {% if user.profile.bio %}
+            <hr class="my-2">
+            <p class="card-text">{{ user.profile.bio }}</p>
+          {% endif %}
+          <div class="text-end">
+            <a href="{% url 'profile_edit' %}" type="button" class="btn btn-primary">Edit profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tests-tab" data-bs-toggle="tab" data-bs-target="#tests-tab-pane" type="button" role="tab" aria-controls="tests-tab-pane" aria-selected="true">Tests</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results-tab-pane" type="button" role="tab" aria-controls="results-tab-pane" aria-selected="false">Results</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="tests-tab-pane" role="tabpanel" aria-labelledby="tests-tab" tabindex="0">
+          <div class="list-group">
+            <a href="{% url 'test_list' %}?list_type=my" class="list-group-item list-group-item-action" aria-current="true">
+              View all tests ({{ user.test_count }})
+            </a>
+            {% for test in user.latest_tests %}
+              <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">
+                <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
+                  <h5 class="mb-1">{{ test.name }}</h5>
+                  <span class="text-muted">Created by: <span class="fw-semibold">{{ test.user.username }}</span></span>
+                </div>
+                <p class="mb-1">{{ test.description }}</p>
+                <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
+                  <small>Passed times: {{ test.passes_number }}</small>
+                  <small>{{ test.created_at }}</small>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="tab-pane fade" id="results-tab-pane" role="tabpanel" aria-labelledby="results-tab" tabindex="0">
+          <div class="list-group">
+            <a href="{% url 'test_results' %}" class="list-group-item list-group-item-action" aria-current="true">
+              View all results ({{ user.result_count }})
+            </a>
+            {% for result in user.latest_results %}
+              <a href="{% url 'test_result' result.pk %}" class="list-group-item list-group-item-action" aria-current="true">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">{{ result.test.name }}</h5>
+                  <small>{{ result.created_at }}</small>
+                </div>
+                <p class="mb-0">
+                  Score: {{ result.score }} / {{ result.question_count }}&nbsp;
+                  ({{ result.score|div:result.question_count|mul:100|floatformat:0 }}%)
+                </p>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

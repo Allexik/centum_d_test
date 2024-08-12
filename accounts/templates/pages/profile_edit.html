@@ -1,0 +1,121 @@
+{% extends "base_generic.html" %}
+{% load rest_framework %}
+{% load static %}
+{% load mathfilters %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/pages/profile-edit.css' %}">
+{% endblock %}
+
+{% block title %}Edit Profile{% endblock %}
+{% block header %}Edit Profile{% endblock %}
+
+{% block content %}
+  <form
+    enctype="multipart/form-data"
+    method="post"
+    class="needs-validation {% if form.is_bound %}was-validated{% endif %}"
+    novalidate
+  >
+    {% csrf_token %}
+    <div class="row gy-3">
+      <div class="col-md-5 col-lg-4">
+        <div class="mb-3">
+          <div class="card">
+            {% if form.profile_image.value %}
+              <img src="{{ form.profile_image.value.url }}" class="profile-image card-img-top" alt="Profile Image">
+            {% else %}
+              <img src="https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930" class="profile-image card-img-top" alt="Profile Image">
+            {% endif %}
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <h5 class="card-title">{{ form.profile_image.label_tag }}</h5>
+                <div class="form-check">
+                  {{ form.clear_profile_image.label_tag|add_class:"form-check-label" }}
+                  {{ form.clear_profile_image|add_class:"form-check-input float-none ms-0" }}
+                </div>
+              </div>
+              {{ form.profile_image|add_class:"form-control" }}
+              {% if form.profile_image.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.profile_image.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-7 col-lg-8">
+        <div class="input-group mb-3">
+          {{ form.first_name.label_tag|add_class:"input-group-text" }}
+          {{ form.first_name|add_class:"form-control" }}
+          {% if form.first_name.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.first_name.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.last_name.label_tag|add_class:"input-group-text" }}
+          {{ form.last_name|add_class:"form-control" }}
+          {% if form.last_name.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.last_name.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.username.label_tag|add_class:"input-group-text" }}
+          {{ form.username|add_class:"form-control" }}
+          {% if form.username.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.username.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="input-group mb-3">
+          {{ form.birth_date.label_tag|add_class:"input-group-text" }}
+          {{ form.birth_date|add_class:"form-control" }}
+          {% if form.birth_date.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.birth_date.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="input-group">
+          {{ form.bio.label_tag|add_class:"input-group-text" }}
+          {{ form.bio|add_class:"form-control" }}
+          {% if form.bio.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.bio.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if form.non_form_errors|length > 0 %}
+      <hr class="mb-2"/>
+    {% endif %}
+    {% for error in form.non_field_errors %}
+      <div class="invalid-feedback d-block">
+        {{ error }}
+      </div>
+    {% endfor %}
+    <div class="buttons mt-3">
+      <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

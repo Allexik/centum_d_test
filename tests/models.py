@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 class Test(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tests')
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     passes_number = models.PositiveIntegerField(default=0)
@@ -54,8 +54,8 @@ class Answer(models.Model):
 
 
 class Result(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    test = models.ForeignKey(Test, on_delete=models.CASCADE)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='results')
+    test = models.ForeignKey(Test, on_delete=models.CASCADE, related_name='results')
     score = models.PositiveSmallIntegerField()
     question_count = models.PositiveSmallIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -66,7 +66,7 @@ class Result(models.Model):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     test = models.ForeignKey(Test, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
