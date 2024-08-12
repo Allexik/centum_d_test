@@ -13,6 +13,22 @@ class TestListView(ListView):
     model = Test
     template_name = 'pages/test_list.html'
 
+    def get_queryset(self):
+        search = self.request.GET.get('search')
+        order_by = self.request.GET.get('order_by', '-created_at').split('__')[0]
+        passes_number_min = self.request.GET.get('passes_number_min')
+        passes_number_max = self.request.GET.get('passes_number_max')
+
+        queryset = super().get_queryset().order_by(order_by)
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        if passes_number_min:
+            queryset = queryset.filter(passes_number__gte=passes_number_min)
+        if passes_number_max:
+            queryset = queryset.filter(passes_number__lte=passes_number_max)
+
+        return queryset
+
 
 class TestDetailView(DetailView):
     model = Test

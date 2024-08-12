@@ -101,7 +101,7 @@
     {% for error in question_formset.non_form_errors %}
       <div class="invalid-feedback d-block">{{ error }}</div>
     {% endfor %}
-    <div class="buttons d-flex mt-3" style="gap: 4px">
+    <div class="buttons d-flex mt-3" style="gap: 0.25rem">
       <button type="button" id="add-question" class="btn btn-secondary">Add question</button>
       <div class="mx-auto"></div>
       {% if object.pk %}

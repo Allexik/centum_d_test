@@ -17,7 +17,7 @@
       <span>Passed times: {{ object.passes_number }}</span>
     </div>
   </div>
-  <div class="buttons d-flex mt-3" style="gap: 4px">
+  <div class="buttons d-flex mt-3" style="gap: 0.25rem">
     {% if object.user == request.user %}
       <a href="{% url 'test_update' object.pk %}" type="button" class="btn btn-outline-secondary">Edit</a>
       <a href="{% url 'test_delete' object.pk %}" type="button" class="btn btn-outline-danger">Delete</a>
