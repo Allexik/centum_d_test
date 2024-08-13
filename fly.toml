@@ -10,7 +10,7 @@ console_command = '/code/manage.py shell'
 [build]
 
 [deploy]
-  release_command = 'python manage.py migrate --noinput && python manage.py create_superuser && python manage.py loaddata init_tests'
+  release_command = "bash -c 'python manage.py migrate --noinput && python manage.py create_superuser --noinput || true && python manage.py loaddata init_tests'"
 
 [env]
   PORT = '8000'
