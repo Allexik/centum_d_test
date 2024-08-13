@@ -5,12 +5,6 @@ FROM python:${PYTHON_VERSION}
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-ARG SECRET_KEY
-ARG DATABASE_URL
-
-ENV SECRET_KEY=${SECRET_KEY}
-ENV DATABASE_URL=${DATABASE_URL}
-
 # install psycopg2 dependencies.
 RUN apt-get update && apt-get install -y \
     libpq-dev \
@@ -27,6 +21,12 @@ RUN set -ex && \
     pip install -r /tmp/requirements.txt && \
     rm -rf /root/.cache/
 COPY . /code
+
+ARG SECRET_KEY
+ARG DATABASE_URL
+
+ENV SECRET_KEY=${SECRET_KEY}
+ENV DATABASE_URL=${DATABASE_URL}
 
 RUN python manage.py collectstatic --noinput
 
