@@ -128,24 +128,32 @@
     </form>
   </div>
   <div class="mt-3">
-    <div class="list-group">
-      {% for test in object_list %}
-        <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">
-          <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
-            <h5 class="mb-1">{{ test.name }}</h5>
-            <span class="text-muted">Created by: <span class="fw-semibold">{{ test.user.username }}</span></span>
-          </div>
-          <p class="mb-1">{{ test.description }}</p>
-          <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
-            <small>Passed times: {{ test.passes_number }}</small>
-            <small>{{ test.created_at }}</small>
-          </div>
-        </a>
-      {% endfor %}
+    {% if object_list %}
+      <div class="list-group">
+        {% for test in object_list %}
+          <a href="{% url 'test_detail' test.pk %}" class="list-group-item list-group-item-action">
+            <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
+              <h5 class="mb-1">{{ test.name }}</h5>
+              <span class="text-muted">Created by: <span class="fw-semibold">{{ test.user.username }}</span></span>
+            </div>
+            <p class="mb-1">{{ test.description }}</p>
+            <div class="d-flex justify-content-between align-items-end" style="gap: 0.5rem">
+              <small>Passed times: {{ test.passes_number }}</small>
+              <small>{{ test.created_at }}</small>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-secondary text-center" role="alert">
+        No tests found.
+      </div>
+    {% endif %}
+    {% include 'partials/pagination.html' %}
+    <div class="buttons text-end">
+      <a href="{% url 'test_create' %}" type="button" class="btn btn-primary">Create new test</a>
     </div>
-    <a href="{% url 'test_create' %}" type="button" class="btn btn-primary mt-3">Create new test</a>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function () {
         const sortForm = document.getElementById('sort-form');

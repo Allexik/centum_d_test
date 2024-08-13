@@ -21,6 +21,7 @@ class AnswerInline(admin.TabularInline):
 class TestAdmin(admin.ModelAdmin):
     inlines = [QuestionInline]
     list_display = ['user', 'name', 'description', 'passes_number', 'created_at', 'updated_at']
+    list_filter = ['user']
 
 
 @admin.register(Question)

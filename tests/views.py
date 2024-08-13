@@ -12,6 +12,7 @@ from tests.utils.views import OwnerRequiredMixin
 class TestListView(ListView):
     model = Test
     template_name = 'pages/test_list.html'
+    paginate_by = 10
 
     def get_queryset(self):
         search = self.request.GET.get('search')
