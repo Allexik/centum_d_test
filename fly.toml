@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for centum-d-test on 2024-08-12T22:38:51+03:00
+# fly.toml app configuration file generated for tests-app on 2024-08-12T22:38:51+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'centum-d-test'
+app = 'tests-app'
 primary_region = 'ams'
 console_command = '/code/manage.py shell'
 
