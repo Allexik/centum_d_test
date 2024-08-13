@@ -7,14 +7,22 @@
 {% block content %}
   <div class="card">
     <div class="card-header d-flex justify-content-between">
-      <span class="fw-semibold">{{ object.name }}</span>
+      <span><span class="fw-semibold">Name: </span>{{ object.name }}</span>
       <span class="text-muted">Created by: <span class="fw-semibold">{{ object.user.username }}</span></span>
     </div>
     <div class="card-body">
-      {{ object.description }}
+        <span>
+          <span class="fw-semibold">Description: </span>
+          {% if object.description %}
+            <span>{{ object.description }}</span>
+          {% else %}
+            <span class="text-muted fst-italic">No description</span>
+          {% endif %}
+        </span>
+
     </div>
     <div class="card-footer">
-      <span>Passed times: {{ object.passes_number }}</span>
+      <span><span class="fw-semibold">Passed times: </span>{{ object.passes_number }}</span>
     </div>
   </div>
   <div class="buttons d-flex mt-3" style="gap: 0.25rem">
