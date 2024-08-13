@@ -32,6 +32,13 @@ class TestListView(ListView):
 
         return queryset
 
+    def get(self, request, *args, **kwargs):
+        if self.request.GET.get('list_type', 'all') == 'my' and not self.request.user.is_authenticated:
+            query_params = self.request.GET.copy()
+            query_params.pop('list_type')
+            return redirect(f'{reverse_lazy("test_list")}?{query_params.urlencode()}')
+        return super().get(request, *args, **kwargs)
+
 
 class TestDetailView(DetailView):
     model = Test

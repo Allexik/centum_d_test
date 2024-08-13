@@ -106,6 +106,7 @@
           id="my-tests"
           autocomplete="off"
           value="my"
+          {% if not request.user.is_authenticated %}disabled{% endif %}
           {% if request.GET.list_type == 'my' %}checked{% endif %}
         >
         <label class="btn btn-outline-secondary text-nowrap" for="my-tests">My tests</label>
